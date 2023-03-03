@@ -129,6 +129,20 @@ class User {
     this.loginToken = token;
   }
 
+  async addFavorite(story){
+    let response = await axios.post(`https://hack-or-snooze-v3.herokuapp.com/users/${currentUser.username}/favorites/${story.storyId}`,{
+      token: currentUser.loginToken,
+    })
+    console.log(response);
+  }
+
+  async removeFavorite(story){
+    let response = await axios.delete(`https://hack-or-snooze-v3.herokuapp.com/users/${currentUser.username}/favorites/${story.storyId}`,{
+      token: currentUser.loginToken,
+    })
+    console.log(response);
+  }
+
   /** Register new user in API, make User instance & return it.
    *
    * - username: a new username
