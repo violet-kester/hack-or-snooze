@@ -20,7 +20,7 @@ async function getAndShowStoriesOnStart() {
  */
 
 function generateStoryMarkup(story) {
-  // console.debug("generateStoryMarkup", story);
+  console.debug("generateStoryMarkup", story);
 
   const hostName = story.getHostName();
   return $(`
@@ -50,3 +50,23 @@ function putStoriesOnPage() {
 
   $allStoriesList.show();
 }
+
+/** addNewStoryToPage: submit story form submit handler.
+ *
+ *  Gets story data from the form,
+ *  calls addStory to create a new Story object,
+ *  and displays this story on the page.
+ */
+
+async function addNewStoryToPage(evt) {
+  evt.preventDefault();
+  const title = $('#create-title').val();
+  const author = $('#create-author').val();
+  const url = $('#create-url').val();
+  // const user = localStorage.getItem("username");
+  const storyToAdd = await storyList.addStory(currentUser, {title, author, url});
+  const storyToAddLi = generateStoryMarkup(storyToAdd);
+  $allStoriesList.prepend(storyToAddLi);
+}
+
+$('#submit-form').on('submit', addNewStoryToPage);

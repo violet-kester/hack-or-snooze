@@ -23,9 +23,15 @@ class Story {
 
   /** Parses hostname out of URL and returns it. */
 
+  // DONE: Return host name, not url
+  // TODO: Url class - check it out. make an instance of it and extract the host name
+  // to handle all cases
   getHostName() {
     // UNIMPLEMENTED: complete this function!
-    return "hostname.com";
+    // const hostName = this.url.replace("http://", "");
+    const hostURL = new URL(this.url);
+    const hostName = hostURL.host;
+    return hostName;
   }
 }
 
@@ -73,10 +79,24 @@ class StoryList {
    * Returns the new Story instance
    */
 
-  async addStory( /* user, newStory */) {
+  // DONE: add the story to the in-memory story list
+  async addStory(user, newStory) {
     // UNIMPLEMENTED: complete this function!
+    console.debug('addStory');
+    console.debug(typeof user);
+    // console.debug(newStory);
+    const token = user.loginToken;
+    let response = await axios.post(`${BASE_URL}/stories`, {
+        token: token,
+        story: newStory
+      }, token);
+      let addedStory = response.data.story;
+      const storyToAdd = new Story(addedStory);
+      storyList.stories.push(storyToAdd);
+      return storyToAdd;
+    }
   }
-}
+
 
 
 /******************************************************************************
@@ -165,7 +185,7 @@ class User {
   }
 
   /** When we already have credentials (token & username) for a user,
-   *   we can log them in automatically. This function does that.
+   *  we can log them in automatically. This function does that.
    */
 
   static async loginViaStoredCredentials(token, username) {
