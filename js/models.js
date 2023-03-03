@@ -136,11 +136,16 @@ class User {
  * request to the API to update server side
  */
   async addFavorite(story){
+    const userToken = currentUser.loginToken;
+    console.debug("addFavorite")
+    //console.log(response);
     let response = await axios({
       url: `${BASE_URL}/users/${currentUser.username}/favorites/${story.storyId}`,
       method: "POST",
-      token: currentUser.loginToken,
+      data: { token: userToken }
   });
+
+    currentUser.favorites.push(story);
 }
 
 /**
@@ -150,11 +155,24 @@ class User {
  */
 
   async removeFavorite(story){
+    const userToken = currentUser.loginToken;
     let response = await axios({
       url: `${BASE_URL}/users/${currentUser.username}/favorites/${story.storyId}`,
       method: "DELETE",
-      token: currentUser.loginToken,
+      data: { token: userToken }
   });
+
+    const favs = currentUser.favorites;
+    for(let i=0; i<favs.length; i++){
+      console.log("favs[i]", favs[i].storyId);
+      console.log("story storyId", story.storyId)
+      if(favs[i].storyId === story.storyId){
+        favs.splice(i, 1);
+
+      }
+
+    }
+    currentUser.favorites = favs;
   }
 
   /** Register new user in API, make User instance & return it.

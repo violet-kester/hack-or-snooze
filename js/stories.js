@@ -76,7 +76,7 @@ $('#submit-form').on('submit', addNewStoryToPage);
 /**  Gets list of favorites, generates their HTML, and puts on page.
  */
 
-async function addFavoritesToPage(evt) {
+function addFavoritesToPage(evt) {
   evt.preventDefault();
   console.debug('addFavoritesToPage');
 
@@ -87,7 +87,7 @@ async function addFavoritesToPage(evt) {
   // loop through all of our stories and generate HTML for them
   for (let fav of currentUser.favorites) {
     const $fav = generateStoryMarkup(fav);
-    $allFavsList.append($fav);
+    $allFavsList.prepend($fav);
     const $starIcon = $fav.find('.bi')[0];
     $starIcon.classList.remove("bi-star");
     $starIcon.classList.add("bi-star-fill");
@@ -102,15 +102,33 @@ $('#nav-favorites').on('click', addFavoritesToPage);
  *  the star icon is clicked.
  */
 
-function toggleFavorite(evt) {
+async function toggleFavorite(evt) {
   evt.preventDefault();
   console.log('toggleFavorite');
+
+  //find star clicked, build array from class names, extract story id
   const $starIcon = evt.target;
   const starIconClasses = Array.from($starIcon.classList);
+  const storyId = $starIcon.closest('li').getAttribute('id');
+
+  //make get request to receive story data
+  const response = await axios({
+    url: `${BASE_URL}/stories/${storyId}`,
+    method: "GET"
+  })
+
+  //create new instance of Story
+  const currentStory = new Story(response.data.story)
+  console.log(currentStory);
+
+  //if story is not a favorite
   if (starIconClasses.includes("bi-star")) {
+    await currentUser.addFavorite(currentStory);
     $starIcon.classList.remove("bi-star");
     $starIcon.classList.add("bi-star-fill");
+  //if story is a favorite
   } else if (starIconClasses.includes("bi-star-fill")) {
+    await currentUser.removeFavorite(currentStory);
     $starIcon.classList.remove("bi-star-fill");
     $starIcon.classList.add("bi-star");
   }
