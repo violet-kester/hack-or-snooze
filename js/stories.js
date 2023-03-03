@@ -72,18 +72,48 @@ async function addNewStoryToPage(evt) {
 
 $('#submit-form').on('submit', addNewStoryToPage);
 
+
+/**  Gets list of favorites, generates their HTML, and puts on page.
+ */
+
 async function addFavoritesToPage(evt) {
   evt.preventDefault();
-  $allStoriesList.hide();
-  let $allFavsList = $(`<ul>`)
+  console.debug('addFavoritesToPage');
+
+  // hide stories list, all user forms, and empty favorites list
+  hidePageComponents();
   $allFavsList.empty();
 
   // loop through all of our stories and generate HTML for them
   for (let fav of currentUser.favorites) {
     const $fav = generateStoryMarkup(fav);
     $allFavsList.append($fav);
+    const $starIcon = $fav.find('.bi')[0];
+    $starIcon.classList.remove("bi-star");
+    $starIcon.classList.add("bi-star-fill");
+
   }
-  $storiesContainer.append($allFavsList);
+  $allFavsList.show();
 }
 
 $('#nav-favorites').on('click', addFavoritesToPage);
+
+/** Adds or removes a story from favorites when
+ *  the star icon is clicked.
+ */
+
+function toggleFavorite(evt) {
+  evt.preventDefault();
+  console.log('toggleFavorite');
+  const $starIcon = evt.target;
+  const starIconClasses = Array.from($starIcon.classList);
+  if (starIconClasses.includes("bi-star")) {
+    $starIcon.classList.remove("bi-star");
+    $starIcon.classList.add("bi-star-fill");
+  } else if (starIconClasses.includes("bi-star-fill")) {
+    $starIcon.classList.remove("bi-star-fill");
+    $starIcon.classList.add("bi-star");
+  }
+}
+
+$('.stories-container').on('click', '.bi', toggleFavorite);
