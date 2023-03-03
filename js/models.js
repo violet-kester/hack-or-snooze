@@ -129,18 +129,32 @@ class User {
     this.loginToken = token;
   }
 
+
+/**
+ * Method that lets user favorite a story
+ * Accepts a Story instance and makes a post
+ * request to the API to update server side
+ */
   async addFavorite(story){
-    let response = await axios.post(`https://hack-or-snooze-v3.herokuapp.com/users/${currentUser.username}/favorites/${story.storyId}`,{
+    let response = await axios({
+      url: `${BASE_URL}/users/${currentUser.username}/favorites/${story.storyId}`,
+      method: "POST",
       token: currentUser.loginToken,
-    })
-    console.log(response);
-  }
+  });
+}
+
+/**
+ * Method that lets user remove favorite story
+ * Accepts a Story instance and makes a delete
+ * request to the API to update server side
+ */
 
   async removeFavorite(story){
-    let response = await axios.delete(`https://hack-or-snooze-v3.herokuapp.com/users/${currentUser.username}/favorites/${story.storyId}`,{
+    let response = await axios({
+      url: `${BASE_URL}/users/${currentUser.username}/favorites/${story.storyId}`,
+      method: "DELETE",
       token: currentUser.loginToken,
-    })
-    console.log(response);
+  });
   }
 
   /** Register new user in API, make User instance & return it.

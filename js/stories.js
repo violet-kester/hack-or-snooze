@@ -71,3 +71,19 @@ async function addNewStoryToPage(evt) {
 }
 
 $('#submit-form').on('submit', addNewStoryToPage);
+
+async function addFavoritesToPage(evt) {
+  evt.preventDefault();
+  $allStoriesList.hide();
+  let $allFavsList = $(`<ul>`)
+  $allFavsList.empty();
+
+  // loop through all of our stories and generate HTML for them
+  for (let fav of currentUser.favorites) {
+    const $fav = generateStoryMarkup(fav);
+    $allFavsList.append($fav);
+  }
+  $storiesContainer.append($allFavsList);
+}
+
+$('#nav-favorites').on('click', addFavoritesToPage);
