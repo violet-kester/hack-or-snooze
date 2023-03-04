@@ -23,12 +23,7 @@ class Story {
 
   /** Parses hostname out of URL and returns it. */
 
-  // DONE: Return host name, not url
-  // TODO: Url class - check it out. make an instance of it and extract the host name
-  // to handle all cases
   getHostName() {
-    // UNIMPLEMENTED: complete this function!
-    // const hostName = this.url.replace("http://", "");
     const hostURL = new URL(this.url);
     const hostName = hostURL.host;
     return hostName;
@@ -72,30 +67,27 @@ class StoryList {
     return new StoryList(stories);
   }
 
-  /** Adds story data to API, makes a Story instance, adds it to story list.
-   * - user - the current instance of User who will post the story
-   * - obj of {title, author, url}
+  /** Adds story data to API, makes a Story instance, adds it to story list,
+   *  and returns the new Story instance.
    *
-   * Returns the new Story instance
+   *  Parameters:
+   *  - user: the current instance of User who will post the story
+   *  - newStory: obj of {title, author, url}
    */
 
-  // DONE: add the story to the in-memory story list
   async addStory(user, newStory) {
-    // UNIMPLEMENTED: complete this function!
     console.debug('addStory');
-    console.debug(typeof user);
-    // console.debug(newStory);
     const token = user.loginToken;
     let response = await axios.post(`${BASE_URL}/stories`, {
-        token: token,
-        story: newStory
-      }, token);
-      let addedStory = response.data.story;
-      const storyToAdd = new Story(addedStory);
-      storyList.stories.push(storyToAdd);
-      return storyToAdd;
-    }
+      token: token,
+      story: newStory
+    }, token);
+    let addedStory = response.data.story;
+    const storyToAdd = new Story(addedStory);
+    storyList.stories.push(storyToAdd);
+    return storyToAdd;
   }
+}
 
 
 
@@ -110,13 +102,13 @@ class User {
    */
 
   constructor({
-                username,
-                name,
-                createdAt,
-                favorites = [],
-                ownStories = []
-              },
-              token) {
+    username,
+    name,
+    createdAt,
+    favorites = [],
+    ownStories = []
+  },
+    token) {
     this.username = username;
     this.name = name;
     this.createdAt = createdAt;
@@ -130,48 +122,47 @@ class User {
   }
 
 
-/**
- * Method that lets user favorite a story
- * Accepts a Story instance and makes a post
- * request to the API to update server side
- */
-  async addFavorite(story){
+  /** Accepts a Story and adds it to user's favorites both in local memory
+   *  and in the server.
+   */
+
+  async addFavorite(story) {
+    console.debug("addFavorite");
     const userToken = currentUser.loginToken;
-    console.debug("addFavorite")
-    //console.log(response);
     let response = await axios({
       url: `${BASE_URL}/users/${currentUser.username}/favorites/${story.storyId}`,
       method: "POST",
       data: { token: userToken }
-  });
+    });
 
     currentUser.favorites.push(story);
-}
+  }
 
-/**
- * Method that lets user remove favorite story
- * Accepts a Story instance and makes a delete
- * request to the API to update server side
- */
+  /** Accepts a Story and removes it from user's favorites both in local memory
+   *  and in the server.
+   */
 
-  async removeFavorite(story){
+  async removeFavorite(story) {
+    console.debug("removeFavorite");
     const userToken = currentUser.loginToken;
+
+    // delete story from favorites server-side
     let response = await axios({
       url: `${BASE_URL}/users/${currentUser.username}/favorites/${story.storyId}`,
       method: "DELETE",
       data: { token: userToken }
-  });
+    });
 
+    // iterate over user favorites and remove matching story in local memory
+    // TODO: favs variable is redundant - references same array
     const favs = currentUser.favorites;
-    for(let i=0; i<favs.length; i++){
-      console.log("favs[i]", favs[i].storyId);
-      console.log("story storyId", story.storyId)
-      if(favs[i].storyId === story.storyId){
+    // TODO: try using filter to remove non-matching
+    for (let i = 0; i < favs.length; i++) {
+      if (favs[i].storyId === story.storyId) {
         favs.splice(i, 1);
-
       }
-
     }
+
     currentUser.favorites = favs;
   }
 

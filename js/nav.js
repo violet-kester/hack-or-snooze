@@ -30,7 +30,7 @@ $navLogin.on("click", navLoginClick);
 /** Show submit form when submit link is clicked */
 
 function navSubmitStoryClick(evt) {
-  console.debug("navSubmitClick", evt);
+  console.debug("navSubmitStoryClick", evt);
   evt.preventDefault();
   $submitForm.show();
 }

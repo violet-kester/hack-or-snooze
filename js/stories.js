@@ -18,9 +18,10 @@ async function getAndShowStoriesOnStart() {
  *
  * Returns the markup for the story.
  */
-
+// TODO: rewrite icon classes so that current favorites are reflected when page is refreshed
+// is it in the fav list? use a ternary
 function generateStoryMarkup(story) {
-  console.debug("generateStoryMarkup", story);
+  console.debug("generateStoryMarkup");
 
   const hostName = story.getHostName();
   return $(`
@@ -64,8 +65,7 @@ async function addNewStoryToPage(evt) {
   const title = $('#create-title').val();
   const author = $('#create-author').val();
   const url = $('#create-url').val();
-  // const user = localStorage.getItem("username");
-  const storyToAdd = await storyList.addStory(currentUser, {title, author, url});
+  const storyToAdd = await storyList.addStory(currentUser, { title, author, url });
   const storyToAddLi = generateStoryMarkup(storyToAdd);
   $allStoriesList.prepend(storyToAddLi);
 }
@@ -80,10 +80,11 @@ function addFavoritesToPage(evt) {
   evt.preventDefault();
   console.debug('addFavoritesToPage');
 
-  // hide stories list, all user forms, and empty favorites list
+  // hide stories list, all user forms, and empties favorites list
   hidePageComponents();
   $allFavsList.empty();
 
+  // TODO: lines 90-93 are unnecessary once above todo is addressed
   // loop through all of our stories and generate HTML for them
   for (let fav of currentUser.favorites) {
     const $fav = generateStoryMarkup(fav);
@@ -91,15 +92,17 @@ function addFavoritesToPage(evt) {
     const $starIcon = $fav.find('.bi')[0];
     $starIcon.classList.remove("bi-star");
     $starIcon.classList.add("bi-star-fill");
-
   }
   $allFavsList.show();
 }
 
+// TODO: group this nav event handler into the nav.js file
 $('#nav-favorites').on('click', addFavoritesToPage);
 
-/** Adds or removes a story from favorites when
- *  the star icon is clicked.
+/** Adds or removes a story from favorites when the star icon is clicked.
+ *  - toggles the star icon.
+ *  - adds/removes favorites to/from server
+ *  - updates UI
  */
 
 async function toggleFavorite(evt) {
@@ -111,27 +114,43 @@ async function toggleFavorite(evt) {
   const starIconClasses = Array.from($starIcon.classList);
   const storyId = $starIcon.closest('li').getAttribute('id');
 
-  //make get request to receive story data
+  // TODO: this should be a static method on the Story class.
+  // (axios requests are all handled in models.js.)
+  // make get request to receive story data
   const response = await axios({
     url: `${BASE_URL}/stories/${storyId}`,
     method: "GET"
-  })
+  });
 
-  //create new instance of Story
-  const currentStory = new Story(response.data.story)
+  // create new instance of Story
+  const currentStory = new Story(response.data.story);
   console.log(currentStory);
 
-  //if story is not a favorite
+  // if story is not a favorite
   if (starIconClasses.includes("bi-star")) {
     await currentUser.addFavorite(currentStory);
     $starIcon.classList.remove("bi-star");
     $starIcon.classList.add("bi-star-fill");
-  //if story is a favorite
+  // if story is a favorite
   } else if (starIconClasses.includes("bi-star-fill")) {
     await currentUser.removeFavorite(currentStory);
     $starIcon.classList.remove("bi-star-fill");
     $starIcon.classList.add("bi-star");
   }
+  // updateUserFavorites(currentStory);
 }
+
+// async function updateUserFavorites(currentStory) {
+//   console.debug('updateUserFavorites');
+//   console.log(currentStory);
+//   console.log(currentUser.favorites.includes(currentStory));
+
+//   NOT WORKING: condition evaluates to false.
+//   Is there an easy way to check if currentStory exists is the user's favorites
+//   without iterating over the array of favorites?
+//   (currentUser.favorites.includes(currentStory))
+//       ? await currentUser.removeFavorite(currentStory)
+//       : await currentUser.addFavorite(currentStory);
+//   }
 
 $('.stories-container').on('click', '.bi', toggleFavorite);
